@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <ItemGroup>
+    <ProjectReference Include="..\Sidwell.Sync.Application\Sidwell.Sync.Application.csproj" />
+    <ProjectReference Include="..\Sidwell.Sync.Persistence\Sidwell.Sync.Persistence.csproj" />
+    <ProjectReference Include="..\Sidwell.Sync.Infrastructure\Sidwell.Sync.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Quartz.Extensions.Hosting" Version="3.19.0" />
+    <PackageReference Include="prometheus-net.AspNetCore" Version="8.2.1" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+</Project>

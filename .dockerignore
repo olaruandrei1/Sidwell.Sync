@@ -1,0 +1,8 @@
+**/bin
+**/obj
+**/.vs
+**/.idea
+**/*.user
+yfinance/__pycache__
+yfinance/*.pyc
+.env

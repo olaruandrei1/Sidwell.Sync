@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Sidwell.Sync.Application/Sidwell.Sync.Application.csproj" />
+    <Project Path="src/Sidwell.Sync.Domain/Sidwell.Sync.Domain.csproj" />
+    <Project Path="src/Sidwell.Sync.Infrastructure/Sidwell.Sync.Infrastructure.csproj" />
+    <Project Path="src/Sidwell.Sync.Persistence/Sidwell.Sync.Persistence.csproj" />
+    <Project Path="src/Sidwell.Sync/Sidwell.Sync.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Sidwell.Sync.UnitTests/Sidwell.Sync.UnitTests.csproj" />
+  </Folder>
+</Solution>
