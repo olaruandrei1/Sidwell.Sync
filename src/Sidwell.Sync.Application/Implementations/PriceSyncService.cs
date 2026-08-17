@@ -71,7 +71,21 @@ public sealed class PriceSyncService(
             await recalcTrigger.TriggerAsync(ticker.Id, today, ct);
             await notifier.CompletedAsync(symbol, ct);
 
-            logger.LogInformation("Sync {Symbol} via {Source}: {Written} bars written", symbol, effectiveSource, written);
+            if (written == 0)
+            {
+                // All configured sources ran without throwing but returned zero usable bars for the
+                // requested range (e.g. every close came back NaN/blank) — the ticker's price silently
+                // stays on its previous value. Surfaced as a warning (not error) since a real holiday/
+                // no-trading day looks identical from here; worth checking source coverage if this
+                // repeats for the same symbol across multiple sync attempts.
+                logger.LogWarning(
+                    "Sync {Symbol} via {Source}: 0 bars written for range {From}..{To} — price will remain unchanged",
+                    symbol, effectiveSource, range.From, range.To);
+            }
+            else
+            {
+                logger.LogInformation("Sync {Symbol} via {Source}: {Written} bars written", symbol, effectiveSource, written);
+            }
 
             return new PriceSyncResult(symbol, ticker.Id, effectiveSource, written, Skipped: false);
         }
