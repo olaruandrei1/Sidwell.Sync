@@ -89,7 +89,7 @@ app.MapPost("/sync/full/{symbol}", async (string symbol, ITickerProfileSyncServi
     }
 
     await TryStep(async () => await profileSync.SyncProfileAsync(symbol, ct));
-    await TryStep(async () => await priceSync.SyncTickerAsync(symbol, ct));
+    await TryStep(async () => await priceSync.SyncTickerAsync(symbol, forceRefresh: true, ct: ct));
     await TryStep(async () => await newsSync.SyncTickerNewsAsync(symbol, ct));
     await TryStep(async () => await secSync.SyncAsync(symbol, ct));
     await TryStep(async () => await analysisSync.SyncTickerAnalysisAsync(symbol, ct));
@@ -105,7 +105,7 @@ app.MapPost("/sync/full/{symbol}", async (string symbol, ITickerProfileSyncServi
 });
 
 app.MapPost("/sync/prices/{symbol}", (string symbol, IPriceSyncService sync, IBroadcastPublisher pub, CancellationToken ct) =>
-    SyncStep.RunAsync(pub, symbol, "prices", async () => await sync.SyncTickerAsync(symbol, ct), ct));
+    SyncStep.RunAsync(pub, symbol, "prices", async () => await sync.SyncTickerAsync(symbol, forceRefresh: true, ct: ct), ct));
 
 app.MapPost("/sync/news/{symbol}", (string symbol, INewsSyncService sync, IBroadcastPublisher pub, CancellationToken ct) =>
     SyncStep.RunAsync(pub, symbol, "news", async () => new { symbol, inserted = await sync.SyncTickerNewsAsync(symbol, ct) }, ct));

@@ -11,5 +11,5 @@ public sealed class PriceSyncJob(IServiceScopeFactory scopeFactory, ILogger<Pric
     protected override string JobName => nameof(PriceSyncJob);
 
     protected override Task SyncOneAsync(IServiceProvider services, string symbol, CancellationToken ct) =>
-        services.GetRequiredService<IPriceSyncService>().SyncTickerAsync(symbol, ct);
+        services.GetRequiredService<IPriceSyncService>().SyncTickerAsync(symbol, ct: ct);
 }

@@ -30,13 +30,13 @@ public sealed class PriceSyncService(
             close = EXCLUDED.close, volume = EXCLUDED.volume, source = EXCLUDED.source;
         """;
 
-    public async Task<PriceSyncResult> SyncTickerAsync(string symbol, CancellationToken ct = default)
+    public async Task<PriceSyncResult> SyncTickerAsync(string symbol, bool forceRefresh = false, CancellationToken ct = default)
     {
         Ticker ticker = await uow.Tickers.AsNoTracking().FirstOrDefaultAsync(t => t.Symbol == symbol, ct)
             ?? throw new InvalidOperationException($"Ticker '{symbol}' not found.");
 
         IReadOnlyList<IPriceSource> sources = router.ResolvePriceSources(ticker);
-        
+
         SyncJob job = await StartJobAsync(sources[0].Source, ct);
 
         try
@@ -46,17 +46,22 @@ public sealed class PriceSyncService(
             DateOnly today = DateOnly.FromDateTime(clock.GetUtcNow().UtcDateTime);
             DateOnly? latest = await uow.Dapper.ExecuteScalarAsync<DateOnly?>(LatestDateSql, new { tickerId = ticker.Id }, ct);
 
-            if (latest is { } current && current >= today)
+            if (!forceRefresh && latest is { } current && current >= today)
             {
                 await FinishJobAsync(job, sources[0].Source, ct);
-                
+
                 logger.LogInformation("Sync {Symbol}: up to date (latest {Latest}), skipped", symbol, current);
-                
+
                 return new PriceSyncResult(symbol, ticker.Id, sources[0].Source, 0, Skipped: true);
             }
 
             // First sync of a ticker (no history yet) => backfill 5 years so historical fiscal-year prices exist.
-            DateRange range = latest is { } last ? new DateRange(last.AddDays(1), today) : DateRange.LastFiveYears(today);
+            // When latest == today, still re-request today (rather than today+1, which would be an empty
+            // range) — today's bar may have been captured mid-session and be stale/partial; the upsert
+            // below overwrites it once the finalized close is available.
+            DateRange range = latest is { } last
+                ? new DateRange(last < today ? last.AddDays(1) : today, today)
+                : DateRange.LastFiveYears(today);
             
             (IReadOnlyList<PriceBar>? bars, DataSource? usedSource) = await FetchWithFallbackAsync(sources, symbol, range, ct);
             
